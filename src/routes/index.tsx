@@ -1,21 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { works, heroImage } from "../lib/works";
-import { STUDIO } from "../lib/studio";
-import { ABSTRACT_ARTS } from "../lib/abstract-data";
+import { motion as framerMotion } from "framer-motion";
+import { heroImage, type Work } from "../lib/works";
+import { STUDIO as staticStudio } from "../lib/studio";
+import { useWorks, useAbstracts, useStudio } from "../lib/store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${STUDIO.name} — Hand-Painted Murals & Wall Art, Faridabad` },
+      { title: `${staticStudio.name} — Hand-Painted Murals & Wall Art, Faridabad` },
       {
         name: "description",
-        content: `Studio by ${STUDIO.artist}. Murals, wall art, restaurant interiors, canvas commissions across India.`,
+        content: `Studio by ${staticStudio.artist}. Murals, wall art, restaurant interiors, canvas commissions across India.`,
       },
-      { property: "og:title", content: `${STUDIO.name} — Mural & Wall Art Studio` },
+      { property: "og:title", content: `${staticStudio.name} — Mural & Wall Art Studio` },
       {
         property: "og:description",
-        content: `Hand-painted murals and wall art by ${STUDIO.artist}, based in ${STUDIO.city}.`,
+        content: `Hand-painted murals and wall art by ${staticStudio.artist}, based in ${staticStudio.city}.`,
       },
       { property: "og:image", content: heroImage },
       { property: "og:url", content: "/" },
@@ -45,11 +45,12 @@ const testimonials = [
 ];
 
 function Index() {
+  const works = useWorks();
   const featured = works.filter((w) => w.featured).slice(0, 6);
   return (
     <>
       <Hero />
-      <Featured items={featured} />
+      {featured.length > 0 && <Featured items={featured} />}
       <AbstractTeaser />
       <Testimonials />
       <CTA />
@@ -58,36 +59,37 @@ function Index() {
 }
 
 function Hero() {
+  const STUDIO = useStudio();
   return (
     <section className="relative px-6 pt-16 pb-24 md:pt-24 md:pb-32 overflow-hidden grain">
       <div className="mx-auto max-w-6xl text-center relative">
-        <motion.p
+        <framerMotion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-xs md:text-sm uppercase tracking-[0.4em] text-primary/70 mb-8"
         >
           Mural Artist · Wall Art · Commercial Interiors
-        </motion.p>
+        </framerMotion.p>
         <h1 className="font-[family-name:var(--font-display)] text-primary leading-[0.88] text-balance">
-          <motion.span
+          <framerMotion.span
             initial={{ opacity: 0, y: 30, rotate: -6 }}
             animate={{ opacity: 1, y: 0, rotate: -2 }}
             transition={{ duration: 0.8, delay: 0.1 }}
             className="block text-6xl sm:text-8xl md:text-[10rem]"
           >
             LET'S PAINT
-          </motion.span>
-          <motion.span
+          </framerMotion.span>
+          <framerMotion.span
             initial={{ opacity: 0, y: 30, rotate: 6 }}
             animate={{ opacity: 1, y: 0, rotate: 1 }}
             transition={{ duration: 0.8, delay: 0.25 }}
             className="block text-6xl sm:text-8xl md:text-[10rem] mt-2 md:mt-4"
           >
             YOUR WALLS
-          </motion.span>
+          </framerMotion.span>
         </h1>
-        <motion.div
+        <framerMotion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.5 }}
@@ -103,7 +105,7 @@ function Hero() {
             <p>{STUDIO.phone}</p>
             <p className="lowercase">{STUDIO.email}</p>
           </div>
-        </motion.div>
+        </framerMotion.div>
         <div className="mt-12 flex flex-wrap justify-center gap-4">
           <Link
             to="/gallery"
@@ -123,7 +125,8 @@ function Hero() {
   );
 }
 
-function Featured({ items }: { items: typeof works }) {
+function Featured({ items }: { items: Work[] }) {
+  const STUDIO = useStudio();
   return (
     <section className="px-6 py-24">
       <div className="mx-auto max-w-7xl">
@@ -140,7 +143,7 @@ function Featured({ items }: { items: typeof works }) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((w, i) => (
-            <motion.figure
+            <framerMotion.figure
               key={w.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -164,7 +167,7 @@ function Featured({ items }: { items: typeof works }) {
                 </span>
                 <span className="text-primary/60">{w.category}</span>
               </figcaption>
-            </motion.figure>
+            </framerMotion.figure>
           ))}
         </div>
       </div>
@@ -182,7 +185,7 @@ function Testimonials() {
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
           {testimonials.map((t, i) => (
-            <motion.blockquote
+            <framerMotion.blockquote
               key={t.by}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -195,7 +198,7 @@ function Testimonials() {
               <footer className="mt-6 text-xs uppercase tracking-[0.25em] opacity-80">
                 — {t.by} · {t.role}
               </footer>
-            </motion.blockquote>
+            </framerMotion.blockquote>
           ))}
         </div>
       </div>
@@ -232,8 +235,12 @@ function CTA() {
 }
 
 function AbstractTeaser() {
-  const firstArt = ABSTRACT_ARTS[0];
-  const secondArt = ABSTRACT_ARTS[1];
+  const ABSTRACT_ARTS = useAbstracts();
+  const STUDIO = useStudio();
+  const firstArt = ABSTRACT_ARTS[0] || null;
+  const secondArt = ABSTRACT_ARTS[1] || firstArt;
+
+  if (!firstArt) return null;
 
   return (
     <section className="px-6 py-24 bg-card border-y-2 border-primary/10 overflow-hidden relative">
@@ -252,9 +259,9 @@ function AbstractTeaser() {
             </h2>
             <p className="text-base md:text-lg text-primary/80 leading-relaxed">
               Step away from representative walls and delve into raw, physical materiality. Our
-              newly published dedicated space showcases Tarun's experimental abstract paintings —
-              featuring hand-troweled Italian marble dust, custom oxide-pigments, soot-ash, and
-              precious metals.
+              newly published dedicated space showcases {STUDIO.artist}'s experimental abstract
+              paintings — featuring hand-troweled Italian marble dust, custom oxide-pigments,
+              soot-ash, and precious metals.
             </p>
             <p className="text-sm text-primary/70">
               Each piece is documented across multiple photographic states, including direct studio
@@ -274,57 +281,61 @@ function AbstractTeaser() {
           {/* Visual Overlay Pile */}
           <div className="lg:col-span-7 flex items-center justify-center relative min-h-[400px] md:min-h-[450px]">
             {/* Background overlapping cards imitating active studio boards */}
-            <motion.div
-              initial={{ opacity: 0, x: -30, rotate: -6 }}
-              whileInView={{ opacity: 1, x: -10, rotate: -4 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="absolute left-4 md:left-12 w-64 md:w-80 rounded-xl border-2 border-primary/25 bg-background p-3 shadow-md rotate-[-4deg]"
-            >
-              <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-primary/5">
-                <img
-                  src={secondArt.photos[0].url}
-                  alt={secondArt.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              <div className="mt-3 text-left">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-primary/50">
-                  {secondArt.series}
-                </span>
-                <p className="font-[family-name:var(--font-display)] text-base text-primary mt-0.5">
-                  {secondArt.title}
-                </p>
-              </div>
-            </motion.div>
+            {secondArt && secondArt.photos && secondArt.photos.length > 0 && (
+              <framerMotion.div
+                initial={{ opacity: 0, x: -30, rotate: -6 }}
+                whileInView={{ opacity: 1, x: -10, rotate: -4 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="absolute left-4 md:left-12 w-64 md:w-80 rounded-xl border-2 border-primary/25 bg-background p-3 shadow-md rotate-[-4deg]"
+              >
+                <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-primary/5">
+                  <img
+                    src={secondArt.photos[0].url}
+                    alt={secondArt.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="mt-3 text-left">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-primary/50">
+                    {secondArt.series}
+                  </span>
+                  <p className="font-[family-name:var(--font-display)] text-base text-primary mt-0.5">
+                    {secondArt.title}
+                  </p>
+                </div>
+              </framerMotion.div>
+            )}
 
-            <motion.div
-              initial={{ opacity: 0, x: 30, rotate: 6 }}
-              whileInView={{ opacity: 1, x: 20, rotate: 3 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="absolute right-4 md:right-12 w-64 md:w-80 rounded-xl border-2 border-primary/25 bg-background p-3 shadow-xl rotate-[3deg] z-10"
-            >
-              <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-primary/5">
-                <img
-                  src={firstArt.photos[0].url}
-                  alt={firstArt.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              <div className="mt-3 text-left">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-primary/50">
-                  {firstArt.series}
-                </span>
-                <p className="font-[family-name:var(--font-display)] text-base text-primary mt-0.5">
-                  {firstArt.title}
-                </p>
-              </div>
-            </motion.div>
+            {firstArt && firstArt.photos && firstArt.photos.length > 0 && (
+              <framerMotion.div
+                initial={{ opacity: 0, x: 30, rotate: 6 }}
+                whileInView={{ opacity: 1, x: 20, rotate: 3 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.15 }}
+                className="absolute right-4 md:right-12 w-64 md:w-80 rounded-xl border-2 border-primary/25 bg-background p-3 shadow-xl rotate-[3deg] z-10"
+              >
+                <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-primary/5">
+                  <img
+                    src={firstArt.photos[0].url}
+                    alt={firstArt.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="mt-3 text-left">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-primary/50">
+                    {firstArt.series}
+                  </span>
+                  <p className="font-[family-name:var(--font-display)] text-base text-primary mt-0.5">
+                    {firstArt.title}
+                  </p>
+                </div>
+              </framerMotion.div>
+            )}
           </div>
         </div>
       </div>

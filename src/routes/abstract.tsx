@@ -1,22 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ABSTRACT_ARTS, type AbstractArtProject } from "../lib/abstract-data";
-import { STUDIO } from "../lib/studio";
+import { type AbstractArtProject } from "../lib/abstract-data";
+import { STUDIO as staticStudio } from "../lib/studio";
+import { useAbstracts, useStudio } from "../lib/store";
 import { Eye, ArrowRight, CornerDownRight, Maximize2, Sparkles, Sliders } from "lucide-react";
 
 export const Route = createFileRoute("/abstract")({
   head: () => ({
     meta: [
-      { title: `Abstract Collection — ${STUDIO.name}` },
+      { title: `Abstract Collection — ${staticStudio.name}` },
       {
         name: "description",
-        content: `Explore the tactile, large-format abstract canvases of ${STUDIO.artist}. Sculpted gesso, natural pigments, and multi-perspective views.`,
+        content: `Explore the tactile, large-format abstract canvases of ${staticStudio.artist}. Sculpted gesso, natural pigments, and multi-perspective views.`,
       },
-      { property: "og:title", content: `Abstract Collection — ${STUDIO.name}` },
+      { property: "og:title", content: `Abstract Collection — ${staticStudio.name}` },
       {
         property: "og:description",
-        content: `Tactile, textured abstract collections by ${STUDIO.artist}.`,
+        content: `Tactile, textured abstract collections by ${staticStudio.artist}.`,
       },
       { property: "og:url", content: "/abstract" },
     ],
@@ -26,20 +27,30 @@ export const Route = createFileRoute("/abstract")({
 });
 
 function AbstractPage() {
-  const [selectedProject, setSelectedProject] = useState<AbstractArtProject>(ABSTRACT_ARTS[0]);
+  const ABSTRACT_ARTS = useAbstracts();
+  const STUDIO = useStudio();
+
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [zoomPhotoIndex, setZoomPhotoIndex] = useState<number>(0);
 
+  // Auto-resolve current project safely
+  const selectedProject = useMemo(() => {
+    if (!ABSTRACT_ARTS || ABSTRACT_ARTS.length === 0) return null;
+    const found = ABSTRACT_ARTS.find((p) => p.id === selectedProjectId);
+    return found || ABSTRACT_ARTS[0];
+  }, [ABSTRACT_ARTS, selectedProjectId]);
+
   // When selected project changes, reset the active photo index
   useEffect(() => {
     setActivePhotoIndex(0);
-  }, [selectedProject]);
+  }, [selectedProject?.id]);
 
   // Handle keyboard navigation for the lightbox
   useEffect(() => {
+    if (!lightboxOpen || !selectedProject) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!lightboxOpen) return;
       if (e.key === "Escape") {
         setLightboxOpen(false);
       } else if (e.key === "ArrowRight") {
@@ -58,6 +69,25 @@ function AbstractPage() {
     setZoomPhotoIndex(index);
     setLightboxOpen(true);
   };
+
+  if (!selectedProject) {
+    return (
+      <div className="bg-background text-primary min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="font-[family-name:var(--font-display)] text-4xl mb-4">
+          No Abstract Projects
+        </h1>
+        <p className="max-w-md opacity-80 mb-6">
+          Create your first abstract series inside the Admin Dashboard.
+        </p>
+        <Link
+          to="/"
+          className="px-6 py-3 bg-primary text-primary-foreground rounded-full text-xs uppercase tracking-wider font-medium"
+        >
+          Go Home
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background text-primary min-h-screen">
@@ -102,7 +132,7 @@ function AbstractPage() {
               return (
                 <button
                   key={proj.id}
-                  onClick={() => setSelectedProject(proj)}
+                  onClick={() => setSelectedProjectId(proj.id)}
                   className={`px-6 py-3 rounded-full text-xs uppercase tracking-[0.25em] border-2 cursor-pointer transition-all shrink-0 font-medium ${
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary shadow-md scale-102"

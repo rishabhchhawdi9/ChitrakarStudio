@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { STUDIO } from "../lib/studio";
+import { useStudio } from "../lib/store";
 
 export function SiteFooter() {
+  const STUDIO = useStudio();
   return (
     <footer className="border-t-2 border-primary/20 mt-24">
       <Marquee />
@@ -80,7 +81,16 @@ export function SiteFooter() {
         <span>
           © {new Date().getFullYear()} {STUDIO.name}
         </span>
-        <span>Painted by hand in India</span>
+        <div className="flex gap-4 items-center">
+          <span>Painted by hand in India</span>
+          <span className="opacity-30">|</span>
+          <Link
+            to="/admin"
+            className="hover:text-primary transition-colors flex items-center gap-1"
+          >
+            <span>Admin</span>
+          </Link>
+        </div>
       </div>
     </footer>
   );

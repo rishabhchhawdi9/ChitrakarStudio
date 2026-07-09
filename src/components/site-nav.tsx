@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { STUDIO } from "../lib/studio";
+import { useStudio } from "../lib/store";
 import { Sun, Moon } from "lucide-react";
 
 const links = [
@@ -15,6 +15,7 @@ const links = [
 export function SiteNav() {
   const [open, setOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const STUDIO = useStudio();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");

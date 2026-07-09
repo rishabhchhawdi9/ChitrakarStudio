@@ -1,6 +1,6 @@
 {
   "name": "Artist Showcase Studio",
-  "description": "A portfolio and showcase studio for local and global artists to feature their masterpieces.",
+  "description": "An exquisite portfolio showcase for Tarun Sharma's Chitrakar Studio, featuring hand-painted murals and dynamic abstract collections backed by an elegant, offline-first administrator dashboard.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

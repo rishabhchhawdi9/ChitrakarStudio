@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { works, CATEGORIES, heroImage, type Category, type Work } from "../lib/works";
-import { STUDIO } from "../lib/studio";
+import { CATEGORIES, heroImage, type Category, type Work } from "../lib/works";
+import { STUDIO as staticStudio } from "../lib/studio";
+import { useWorks, useStudio } from "../lib/store";
 import { getPinterestFeed, type PinterestPin } from "../lib/pinterest";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, RefreshCw, Eye } from "lucide-react";
@@ -10,15 +11,15 @@ import { ExternalLink, RefreshCw, Eye } from "lucide-react";
 export const Route = createFileRoute("/gallery")({
   head: () => ({
     meta: [
-      { title: `Gallery — ${STUDIO.name}` },
+      { title: `Gallery — ${staticStudio.name}` },
       {
         name: "description",
-        content: `Selected murals, wall art, canvas and interior work by ${STUDIO.artist}.`,
+        content: `Selected murals, wall art, canvas and interior work by ${staticStudio.artist}.`,
       },
-      { property: "og:title", content: `Gallery — ${STUDIO.name}` },
+      { property: "og:title", content: `Gallery — ${staticStudio.name}` },
       {
         property: "og:description",
-        content: `Hand-painted murals, wall art and canvas work from the ${STUDIO.name} studio.`,
+        content: `Hand-painted murals, wall art and canvas work from the ${staticStudio.name} studio.`,
       },
       { property: "og:image", content: heroImage },
       { property: "og:url", content: "/gallery" },
@@ -29,6 +30,8 @@ export const Route = createFileRoute("/gallery")({
 });
 
 function GalleryPage() {
+  const works = useWorks();
+  const STUDIO = useStudio();
   const [viewMode, setViewMode] = useState<"studio" | "pinterest">("studio");
   const [filter, setFilter] = useState<Category | "All">("All");
   const [active, setActive] = useState<Work | null>(null);
@@ -36,7 +39,7 @@ function GalleryPage() {
 
   const filtered = useMemo(
     () => (filter === "All" ? works : works.filter((w) => w.category === filter)),
-    [filter],
+    [filter, works],
   );
 
   // React Query for live Pinterest feed
