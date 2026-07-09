@@ -1,0 +1,6 @@
+{
+  "name": "Artist Showcase Studio",
+  "description": "A portfolio and showcase studio for local and global artists to feature their masterpieces.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
