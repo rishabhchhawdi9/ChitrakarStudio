@@ -83,13 +83,7 @@ export function SiteFooter() {
         </span>
         <div className="flex gap-4 items-center">
           <span>Painted by hand in India</span>
-          <span className="opacity-30">|</span>
-          <Link
-            to="/admin"
-            className="hover:text-primary transition-colors flex items-center gap-1"
-          >
-            <span>Admin</span>
-          </Link>
+          
         </div>
       </div>
     </footer>
