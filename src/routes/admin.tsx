@@ -141,7 +141,7 @@ function AdminPage() {
   // Handle Authenticate
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode.trim() === "admin") {
+    if (passcode.trim() === "Chitrakar2026!") {
       setIsAuthenticated(true);
       setAuthError("");
       if (typeof window !== "undefined") {
