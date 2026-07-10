@@ -25,19 +25,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build
+        env:
+          STATIC_PAGES: "true"
+          VITE_BASE_PATH: /ChitrakarStudio/
         run: npm run build
+
+      - name: Add GitHub Pages SPA fallback
+        run: cp dist/client/index.html dist/client/404.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: 'dist/client'
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
